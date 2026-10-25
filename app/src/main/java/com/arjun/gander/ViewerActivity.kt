@@ -2150,6 +2150,10 @@ open class ViewerActivity : AppCompatActivity() {
                         (if (kind == FileKind.EPUB) "&type=$phoneTextZoom" else "") +
                         // The room to leave at the top for the title bar floating over it
                         (documentChrome?.let { "&top=${it.heightDp()}" } ?: "") +
+                        // The language the viewer pages write their own chrome in, which
+                        // app.js reads: a resource file cannot reach a page, so the page is
+                        // told the code and holds the words for it
+                        "&lang=" + resources.configuration.locales[0].language +
                         floor +
                         (if (cardOffersSimple) "&simple=1" else "")
                 )

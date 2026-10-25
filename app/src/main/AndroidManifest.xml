@@ -27,9 +27,10 @@
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:localeConfig="@xml/locales_config"
         android:supportsRtl="true"
         android:theme="@style/Theme.Gander"
-        tools:targetApi="31">
+        tools:targetApi="33">
 
         <!-- The WebView provider uploads usage and diagnostic metrics for every app that
              embeds it, package name included, from its own process, which has the network

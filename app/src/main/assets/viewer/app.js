@@ -558,3 +558,270 @@ function vwFormatSize(bytes) {
 window.onerror = function (message) {
   vwError("Something went wrong while rendering", String(message));
 };
+
+/*
+ * Simplified Chinese for the viewer pages.
+ *
+ * The pages are English in their markup and in what their scripts say, and the Kotlin side
+ * has no way to hand a whole resource file across. So ViewerActivity puts the language it
+ * is running in on the URL as lang=<code>, and this rewrites what the page shows: the text
+ * already in the markup, and every node the viewers add afterwards, which is why it watches
+ * the document rather than walking it once.
+ *
+ * The rewrite is a lookup, not a translation engine: a string is replaced only when it is a
+ * key in the table below, or matches one of the patterns that cover the sentences a viewer
+ * builds by joining words to numbers. Anything else stays as it is, so a message added to a
+ * viewer later shows in English rather than in Chinese with an English clause in the middle.
+ * Nothing here runs on a page opened in another language, which also leaves the browser
+ * tests, which never pass lang, exactly as they were.
+ */
+(function () {
+  var lang = (vwParams.get("lang") || "").toLowerCase();
+  if (lang.indexOf("zh") !== 0) return;
+
+  /* Whole strings, compared after their leading and trailing space is trimmed. */
+  var ZH = {
+    /* Page titles and the line a viewer shows while it works. */
+    "PDF document": "PDF 文档",
+    "Word document": "Word 文档",
+    "Spreadsheet": "表格",
+    "Presentation": "演示文稿",
+    "Markdown": "Markdown",
+    "Text": "文本",
+    "Image": "图片",
+    "Book": "电子书",
+    "Document": "文档",
+    "3D model": "3D 模型",
+    "Unknown format": "未知格式",
+    "Rendering document…": "正在渲染文档…",
+    "Rendering…": "正在渲染…",
+    "Rendering slides…": "正在渲染幻灯片…",
+    "Rendering slides… ": "正在渲染幻灯片…",
+    "Loading…": "正在加载…",
+    "Loading spreadsheet…": "正在加载表格…",
+    "Opening document…": "正在打开文档…",
+    "Opening book…": "正在打开电子书…",
+    "Opening model…": "正在打开模型…",
+
+    /* Chrome: books, the text viewer, the card for a format with no viewer. */
+    "Show more": "显示更多",
+    "Contents": "目录",
+    "Previous": "上一页",
+    "Next": "下一页",
+    "Close": "关闭",
+    "Copy address": "复制地址",
+    "This link leaves the book": "此链接会离开本书",
+    "Gander opens no web address. Copy it to open it in a browser.":
+      "Gander 不会打开任何网址。复制后可在浏览器中打开。",
+    "Gander doesn't recognize this format": "Gander 无法识别此格式",
+    "View as text": "按文本查看",
+    "If it isn't text, you'll see random characters.": "如果不是文本，你只会看到乱码。",
+    "Open in simple view": "以简易视图打开",
+    "Shows the pages as pictures, without search, text selection or form entries.":
+      "以图片形式显示页面，无法搜索、选择文字或填写表单。",
+
+    /* The heading of a card that says why a document is not on the screen. */
+    "Could not render this PDF": "无法渲染此 PDF",
+    "Could not render this Word document": "无法渲染此 Word 文档",
+    "Could not render this presentation": "无法渲染此演示文稿",
+    "Could not render this Markdown file": "无法渲染此 Markdown 文件",
+    "Could not open this document": "无法打开此文档",
+    "Could not open this spreadsheet": "无法打开此表格",
+    "Could not open this book": "无法打开此电子书",
+    "Could not show this model": "无法显示此模型",
+    "Could not display this image": "无法显示此图片",
+    "Could not read this file": "无法读取此文件",
+    "Could not read the rest of this file": "无法读取此文件的其余部分",
+    "This PDF could not be read": "无法读取此 PDF",
+    "This PDF needs a password": "此 PDF 需要密码",
+    "This file is not a PDF that can be read": "此文件不是可读取的 PDF",
+    "This book is locked": "本书已锁定",
+    "This model is too large to show": "此模型太大，无法显示",
+    "This model is empty": "此模型为空",
+    "3D models cannot be shown on this phone": "此手机无法显示 3D 模型",
+    "Something went wrong while rendering": "渲染时出现问题",
+    "This page could not be drawn": "无法绘制此页面",
+    "Not a page.": "不是页面。",
+    "Its renderer stopped.": "其渲染器已停止。",
+
+    /* And the sentence under that heading. */
+    "This is not a Word document.": "这不是 Word 文档。",
+    "This is not a Word document: it has no text inside it.": "这不是 Word 文档：其中没有文本。",
+    "This Word document is damaged.": "此 Word 文档已损坏。",
+    "This Word document is damaged: its table stream is missing.":
+      "此 Word 文档已损坏：缺少表格流。",
+    "This Word document is too large to open here.": "此 Word 文档太大，无法在此打开。",
+    "This document is too large to open here.": "此文档太大，无法在此打开。",
+    "This document is nested too deeply to read.": "此文档嵌套层级过深，无法读取。",
+    "This is not an OpenDocument text document.": "这不是 OpenDocument 文本文档。",
+    "This file has no document inside it.": "此文件内部没有文档。",
+    "The file is empty.": "文件为空。",
+    "The workbook has no sheets": "工作簿中没有工作表",
+    "This document is protected by a password, and Gander cannot open password-protected Word documents.":
+      "此文档受密码保护，Gander 无法打开加密的 Word 文档。",
+    "This document is protected by a password, and Gander cannot open password-protected OpenDocument files.":
+      "此文档受密码保护，Gander 无法打开加密的 OpenDocument 文件。",
+    "It is not an EPUB, or the file is damaged.": "它不是 EPUB，或者文件已损坏。",
+    "It is protected against copying (DRM), so only the app of the shop or library it came from can open it.":
+      "它受复制保护（DRM），只有提供它的商店或图书馆的应用才能打开。",
+    "One of the book's own files is not sound XML.": "本书的某个内部文件不是有效的 XML。",
+    "This part of the book could not be read.": "本书的这一部分无法读取。",
+    "The book lists no chapters.": "本书没有列出任何章节。",
+    "The book does not say where its chapters are listed.": "本书未说明章节列表的位置。",
+    "It may be damaged, or made in a way the simple view can't draw.":
+      "它可能已损坏，或用简易视图无法绘制的方式制作。",
+    "The simple view, which this phone gets for PDFs, can't open a PDF that needs one.":
+      "此手机的 PDF 使用简易视图，无法打开需要密码的 PDF。",
+    "Gander could not read the file it was given. Opening it again usually settles this.":
+      "Gander 无法读取拿到的文件内容。重新打开通常就能解决。",
+    "The phone ran out of graphics memory while reading it.": "读取时手机的显存不足。",
+    "There are no triangles in it to draw.": "其中没有可绘制的三角形。",
+    "This is a legacy Office format (.ppt). If you re-save it as .pptx, Gander can display it.":
+      "这是旧版 Office 格式（.ppt）。如果另存为 .pptx，Gander 就能显示。",
+    "This .pptx may use features the built-in renderer does not understand yet.":
+      "此 .pptx 可能用到了内置渲染器尚不支持的功能。",
+    "Updating Android System WebView and reopening the file will fix it.":
+      "更新 Android System WebView 后重新打开文件即可解决。",
+    "An update to Android System WebView can turn it back on.":
+      "更新 Android System WebView 可以重新开启它。",
+    "Gander draws them with WebGL, and Android System WebView has turned WebGL off on this phone, which it does when the phone's graphics driver is known to misbehave. An update to Android System WebView can turn it back on.":
+      "Gander 用 WebGL 绘制它们，而此手机的 Android System WebView 已关闭 WebGL——手机的显卡驱动被判定有问题时就会这样。更新 Android System WebView 可以重新开启。",
+    "It does not begin the way an STL file does: as text starting with the word solid, or as a binary header followed by a count of triangles.":
+      "它的开头不像 STL 文件：既不是以单词 solid 开头的文本，也不是后接三角形数量的二进制头。",
+    "It does not begin the way an OpenDocument, Rich Text or Word 97-2003 file does. If it was saved by an older Word, Word 2 say, Gander cannot read it; re-saving it in any of those three formats will help.":
+      "它的开头不像 OpenDocument、RTF 或 Word 97-2003 文件。如果它由更早版本的 Word（比如 Word 2）保存，Gander 就无法读取；用这三种格式之一另存即可。",
+
+    /* The pieces a viewer puts in the corner of a picture it cannot draw. */
+    "A chart that cannot be shown here": "此处无法显示的图表",
+    "A diagram that cannot be shown here": "此处无法显示的示意图",
+    "A picture in a format that cannot be shown here": "格式不受支持、无法在此显示的图片",
+    "A picture that cannot be shown here": "此处无法显示的图片",
+    "A shape that cannot be shown here": "此处无法显示的形状",
+    "A table that cannot be shown here": "此处无法显示的表格",
+    "An object that cannot be shown here": "此处无法显示的对象"
+  };
+
+  /* Sentences a viewer joins words and numbers into, matched whole. */
+  var ZH_PATTERNS = [
+    [/^Android System WebView is too old to show (.+)$/, "Android System WebView 版本过低，无法显示$1"],
+    [/^(.+) cannot be shown on this phone$/, "此手机无法显示$1"],
+    [
+      /^(.+) need the browser engine built into your phone to be version (\d+) or newer, and this one is (.+)\. On this phone that engine comes from the manufacturer and cannot be updated or replaced, so installing Android System WebView will not help\.$/,
+      "$1 需要手机内置的浏览器引擎为 $2 或更高版本，而这台手机是 $3。此手机的该引擎由厂商提供，无法更新或替换，所以安装 Android System WebView 也没用。"
+    ],
+    [
+      /^(.+) need a newer browser engine than the one built into your phone\. On this phone that engine comes from the manufacturer and cannot be updated or replaced, so installing Android System WebView will not help\.$/,
+      "$1 需要比手机内置版本更新的浏览器引擎。此手机的该引擎由厂商提供，无法更新或替换，所以安装 Android System WebView 也没用。"
+    ],
+    [
+      /^Gander opens (.+) using Android System WebView, the browser engine built into your phone\. (.+)$/,
+      "Gander 使用手机内置的浏览器引擎 Android System WebView 打开$1。$2"
+    ],
+    [
+      /^(.+) need version (\d+) or newer, and this one is (.+)\. Updating Android System WebView and reopening the file will fix it\.$/,
+      "$1 需要 $2 或更高版本，而这台手机是 $3。更新 Android System WebView 后重新打开文件即可。"
+    ],
+    [
+      /^Gander draws up to (.+) triangles on a phone with this much memory, and this model has (.+)\.$/,
+      "这台手机的内存下，Gander 最多绘制 $1 个三角形，而这个模型有 $2 个。"
+    ],
+    [/^Showing the first (.+) of this file\.$/, "已显示此文件的前 $1。"],
+    [
+      /^The simple view shows the first (\d+) of this PDF's (\d+) pages\.$/,
+      "简易视图只显示此 PDF 共 $2 页中的前 $1 页。"
+    ],
+    [/^Could not read the file \(HTTP (\d+)\)$/, "无法读取文件（HTTP $1）"],
+    [/^The graphics driver refused a program: (.*)$/, "显卡驱动拒绝了一个程序：$1"],
+    [/^The graphics driver refused a shader: (.*)$/, "显卡驱动拒绝了一个着色器：$1"],
+    [
+      /^It is either damaged or not a PDF at all, whatever it happens to be named\. Every other format Gander opens still works\.$/,
+      "它要么已损坏，要么根本不是 PDF，无论文件名叫什么。Gander 支持的其他格式仍然正常。"
+    ]
+  ];
+
+  /* 1.2 million reads as 120 万, in the figure a triangle count is given in. */
+  function zhFigure(text) {
+    return text.replace(/(\d+(?:\.\d+)?) million/, function (all, n) {
+      return Math.round(Number(n) * 100) + " 万";
+    });
+  }
+
+  function zhFor(text) {
+    var trimmed = text.replace(/^\s+|\s+$/g, "");
+    if (!trimmed) return null;
+    if (Object.prototype.hasOwnProperty.call(ZH, trimmed)) {
+      return text.replace(trimmed, ZH[trimmed]);
+    }
+    for (var i = 0; i < ZH_PATTERNS.length; i++) {
+      var rule = ZH_PATTERNS[i];
+      if (rule[0].test(trimmed)) {
+        var said = zhFigure(trimmed.replace(rule[0], rule[1]));
+        return text.replace(trimmed, said);
+      }
+    }
+    return null;
+  }
+
+  /* Writing a node tells the observer about it, and it must not read that as a change. */
+  var writing = false;
+
+  function zhNode(node) {
+    if (writing) return;
+    var said = zhFor(node.nodeValue);
+    if (said === null || said === node.nodeValue) return;
+    writing = true;
+    node.nodeValue = said;
+    writing = false;
+  }
+
+  var ZH_ATTRIBUTES = ["title", "aria-label", "placeholder", "alt"];
+
+  function zhAttributes(el) {
+    if (writing || !el.getAttribute) return;
+    for (var i = 0; i < ZH_ATTRIBUTES.length; i++) {
+      var name = ZH_ATTRIBUTES[i];
+      var value = el.getAttribute(name);
+      if (!value) continue;
+      var said = zhFor(value);
+      if (said === null || said === value) continue;
+      writing = true;
+      el.setAttribute(name, said);
+      writing = false;
+    }
+  }
+
+  function zhTree(root) {
+    if (root.nodeType === 3) zhNode(root);
+    else if (root.nodeType === 1) zhAttributes(root);
+    if (!root.querySelectorAll) return;
+    var texts = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    while (texts.nextNode()) zhNode(texts.currentNode);
+    var withAttributes = root.querySelectorAll("[title],[aria-label],[placeholder],[alt]");
+    for (var i = 0; i < withAttributes.length; i++) zhAttributes(withAttributes[i]);
+  }
+
+  document.documentElement.lang = "zh-Hans-CN";
+  if (document.title) {
+    var title = zhFor(document.title);
+    if (title !== null) document.title = title;
+  }
+  zhTree(document.body || document.documentElement);
+
+  if (typeof MutationObserver === "function") {
+    new MutationObserver(function (records) {
+      if (writing) return;
+      for (var i = 0; i < records.length; i++) {
+        var record = records[i];
+        if (record.type === "characterData") {
+          zhNode(record.target);
+        } else {
+          for (var j = 0; j < record.addedNodes.length; j++) zhTree(record.addedNodes[j]);
+        }
+      }
+    }).observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+  }
+})();
