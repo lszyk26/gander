@@ -38,3 +38,57 @@ scripts/screenshots/out/
 # compress between versions. Rebuild it with scripts/make-press-kit.sh before
 # uploading docs/press/ to cPanel.
 docs/press/assets/gander-press-kit.zip
+# >>> server-autobackup (ssh-mcp) >>>
+**/.snapshots/
+**/.venv/
+**/__pycache__/
+**/backup-*/
+**/backup/
+**/backups/
+**/cache/
+**/data/
+**/lost+found/
+**/node_modules/
+**/tmp/
+**/uploads/
+**/venv/
+*.bak*
+*.crt
+*.db
+*.dump
+*.gz
+*.key
+*.log
+*.orig
+*.p12
+*.pem
+*.pre-*
+*.pyc
+*.snippet
+*.sql
+*.sqlite
+*.sqlite3
+*.tar
+*.tar.*
+*.zip
+*.zst
+*password*
+*secret*
+*token*
+.DS_Store
+.env*
+.snapshots/
+.venv/
+__pycache__/
+backup-*/
+backup/
+backups/
+cache/
+data/
+env
+lost+found/
+node_modules/
+tmp/
+uploads/
+venv/
+# <<< server-autobackup (ssh-mcp) <<<
